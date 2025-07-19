@@ -9,8 +9,14 @@ function register() {
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({username, password})
     })
-    .then(res => res.json())
-    .then(data => alert(data.message));
+    .then(async res => {
+        const data = await res.json();
+        if (res.ok) {
+            alert(data.message); // "User registered successfully!"
+        } else {
+            alert(data.message); // "User already exists!" or error
+        }
+    });
 }
 
 function login() {

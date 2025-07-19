@@ -4,7 +4,6 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_cors import CORS
 
-
 app = Flask(__name__)
 CORS(app)
 
@@ -12,13 +11,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///notes.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
-
 class Note(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
+# Create DB tables
 with app.app_context():
     db.create_all()
 
@@ -44,8 +43,7 @@ def add_note():
     db.session.commit()
     return jsonify({'message': 'Note created!'}), 201
 
-
-@app.route('/notes/<int:id>', methods = ['PUT'])
+@app.route('/notes/<int:id>', methods=['PUT'])
 def update_note(id):
     note = Note.query.get_or_404(id)
     data = request.get_json()
@@ -61,8 +59,7 @@ def delete_note(id):
     db.session.commit()
     return jsonify({'message': 'Note deleted!'})
 
-
-# User Model
+# User model
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -74,13 +71,14 @@ class User(db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-app.config['JWT_SECRET_KEY'] = 'test'  # Use env variable in production!
+app.config['JWT_SECRET_KEY'] = 'test'
 jwt = JWTManager(app)
 
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
-    if User.query.filter_by(username=data['username']).first():
+    existing_user = User.query.filter_by(username=data['username']).first()
+    if existing_user:
         return jsonify({'message': 'User already exists!'}), 400
 
     new_user = User(username=data['username'])
