@@ -1,0 +1,9 @@
+#General
+*.python-version
+**.DS_Store**
+**__pycache__**
+/.venv
+/.env
+
+#DB specific
+**notes.db
