@@ -16,7 +16,8 @@ def get_notes():
         current_user_id = get_jwt_identity()
         notes = Note.query.filter_by(user_id=current_user_id).all()
         return jsonify(
-            [{"id": n.id, "title": n.title, "content": n.content} for n in notes]
+            [{"id": n.id, "title": n.title, "content": n.content}
+                for n in notes]
         )
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -31,6 +32,7 @@ def get_note(id):
 @bp.route("/notes", methods=["POST"])
 @jwt_required()
 def add_note():
+    print("Add note function triggered")
     try:
         current_user_id = get_jwt_identity()
         data = request.get_json()
@@ -86,7 +88,9 @@ def login():
     user = User.query.filter_by(username=data["username"]).first()
     if not user or not user.check_password(data["password"]):
         return jsonify({"message": "Invalid credentials!"}), 401
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(
+        identity=str(user.id))
+    # For some reason converting user.id to str fixes the note adding feature. Else it gives error 422.
     return jsonify({"access_token": access_token})
 
 
